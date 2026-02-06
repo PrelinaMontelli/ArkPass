@@ -24,7 +24,7 @@
 1. **功能与资源盘点**
    - 明确 App 需要保留的功能与界面；整理 `eez_design` 的 UI 资源与播放素材。
 2. **选定 UI 技术路线**
-   - **路线 A：原样复刻** → 为 LVGL 编写 iOS 显示驱动（或找现有移植），保持 UI 结构；
+   - **路线 A：原样复制** → 为 LVGL 编写 iOS 显示驱动（或找现有移植），保持 UI 结构；
    - **路线 B：原生重写** → 使用 SwiftUI/UIKit 重新实现 UI（更符合 iOS 生态）。
 3. **抽离“平台无关核心”**
    - 将 `prts`、配置解析、资源索引等抽离为 C 静态库；
@@ -32,7 +32,7 @@
 4. **重建媒体与渲染管线**
    - 视频解码：AVFoundation/VideoToolbox；
    - Overlay/UI 合成：CoreAnimation 或 Metal；
-   - 定帧驱动：CADisplayLink 代替 vblank。
+   - 帧同步驱动：使用 CADisplayLink 代替 vblank。
 5. **输入/交互迁移**
    - 将 evdev 事件映射为 iOS 触摸/手势；
    - 重新设计需要实体按键的交互逻辑。
@@ -53,6 +53,6 @@
 
 ## 风险提示
 
-- **“原样复刻”成本高**：DRM/Plane/硬件合成不可用，功能等价实现依赖新渲染架构。
+- **“原样复制”成本高**：DRM/Plane/硬件合成不可用，功能等价实现依赖新渲染架构。
 - **Cedar 解码不可用**：必须全面替换为 AVFoundation/VideoToolbox。
 - **IPC 与扩展 App 机制**（`src/apps/*`）在 iOS 需重新设计（可能需内嵌或改为 App 内模块）。
