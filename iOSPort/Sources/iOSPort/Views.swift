@@ -22,6 +22,7 @@ struct RootView: View {
 
 struct VideoLayerView: View {
     @EnvironmentObject var state: AppState
+    @State private var player = AVPlayer()
 
     private var loopVideoURL: URL? {
         guard let asset = state.selectedOperator,
@@ -34,13 +35,28 @@ struct VideoLayerView: View {
     var body: some View {
         Group {
             if let url = loopVideoURL {
-                VideoPlayer(player: AVPlayer(url: url))
+                VideoPlayer(player: player)
             } else {
                 Color.black
             }
         }
         .frame(width: UIConstants.width, height: UIConstants.height)
         .clipped()
+        .onAppear {
+            updatePlayer()
+        }
+        .onChange(of: loopVideoURL) { _ in
+            updatePlayer()
+        }
+    }
+
+    private func updatePlayer() {
+        if let url = loopVideoURL {
+            player.replaceCurrentItem(with: AVPlayerItem(url: url))
+            player.play()
+        } else {
+            player.replaceCurrentItem(with: nil)
+        }
     }
 }
 

@@ -65,7 +65,10 @@ struct OperatorConfig: Codable {
     }
 
     var displayName: String {
-        name?.isEmpty == false ? name! : "(未命名)"
+        guard let name, !name.isEmpty else {
+            return "(未命名)"
+        }
+        return name
     }
 }
 

@@ -5,29 +5,33 @@ enum AssetLocator {
     static let appsDirectoryName = "app"
     static let operatorConfigFilename = "epconfig.json"
 
-    static func documentsURL() -> URL {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    static func documentsURL() -> URL? {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
     }
 
     static func assetsRoot() -> URL? {
-        let documents = documentsURL().appendingPathComponent(assetDirectoryName, isDirectory: true)
-        if FileManager.default.fileExists(atPath: documents.path) {
-            return documents
+        if let documents = documentsURL() {
+            let documentsPath = documents.appendingPathComponent(assetDirectoryName, isDirectory: true)
+            if FileManager.default.fileExists(atPath: documentsPath.path) {
+                return documentsPath
+            }
         }
         return Bundle.main.resourceURL?.appendingPathComponent(assetDirectoryName, isDirectory: true)
     }
 
     static func appsRoot() -> URL? {
-        let documents = documentsURL().appendingPathComponent(appsDirectoryName, isDirectory: true)
-        if FileManager.default.fileExists(atPath: documents.path) {
-            return documents
+        if let documents = documentsURL() {
+            let documentsPath = documents.appendingPathComponent(appsDirectoryName, isDirectory: true)
+            if FileManager.default.fileExists(atPath: documentsPath.path) {
+                return documentsPath
+            }
         }
         return Bundle.main.resourceURL?.appendingPathComponent(appsDirectoryName, isDirectory: true)
     }
 
     static func resourceRoot() -> URL? {
-        let documents = documentsURL()
-        if FileManager.default.fileExists(atPath: documents.path) {
+        if let documents = documentsURL(),
+           FileManager.default.fileExists(atPath: documents.path) {
             return documents
         }
         return Bundle.main.resourceURL
@@ -85,7 +89,9 @@ struct AssetImportResult {
 enum AssetImporter {
     static func importAssets(from url: URL) throws -> AssetImportResult {
         let fm = FileManager.default
-        let docs = AssetLocator.documentsURL()
+        guard let docs = AssetLocator.documentsURL() else {
+            throw AssetImportError.invalidSelection
+        }
         let selection = url
         let isDirectory = (try? selection.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
         guard isDirectory else { throw AssetImportError.invalidSelection }
