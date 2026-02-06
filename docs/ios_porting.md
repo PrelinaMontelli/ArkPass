@@ -24,8 +24,8 @@
 1. **功能与资源盘点**
    - 明确 App 需要保留的功能与界面；整理 `eez_design` 的 UI 资源与播放素材。
 2. **选定 UI 技术路线**
-   - **路线 A：原样复制** → 为 LVGL 编写 iOS 显示驱动（或找现有移植），保持 UI 结构；
-   - **路线 B：原生重写** → 使用 SwiftUI/UIKit 重新实现 UI（更符合 iOS 生态）。
+   - **当前选择：SwiftUI 全面重写** → 以 SwiftUI 复刻界面与交互，保持视觉一致性但重构实现细节。
+   - EEZ Studio 与 LVGL 生成代码仅作为参考素材，不再直接复用。
 3. **抽离“平台无关核心”**
    - 将 `prts`、配置解析、资源索引等抽离为 C 静态库；
    - 通过 Objective-C++/Swift 桥接调用。
@@ -43,13 +43,47 @@
    - 建立 Xcode 工程与 CI；
    - 关键流程（播放、切换、过渡、UI 操作）做端到端验证。
 
+## SwiftUI 重写落地方案与技术选型建议
+
+### 1) 技术选型（推荐组合）
+
+- **UI 框架**：SwiftUI（主界面、设置、列表等）
+- **状态管理**：Combine + `ObservableObject` / `@State`（或 Swift Concurrency + `@MainActor`）
+- **视频解码/播放**：AVFoundation（`AVPlayer` / `AVSampleBufferDisplayLayer`）
+- **过渡/Overlay**：CoreAnimation（简单叠加）或 Metal（高性能特效）
+- **帧同步**：CADisplayLink（驱动过渡动画与时间线）
+- **配置解析**：Swift `Codable`（读取 `epconfig.json`）
+- **资源管理**：`FileManager` + App Bundle / Documents 沙盒路径
+
+### 2) 模块拆分（建议工程结构）
+
+- **Core 模块（可复用）**：保留 `prts`/`utils` 的业务编排思想，重写为 Swift 或抽成 C 静态库桥接。
+- **Playback 引擎**：封装视频播放、时序控制与状态机。
+- **Overlay 引擎**：负责过渡/干员信息效果的绘制与帧驱动。
+- **UI 层（SwiftUI）**：页面结构、交互逻辑、状态绑定。
+
+### 3) 关键映射关系（示例）
+
+- `prts_timer` → `DispatchSourceTimer` / `Task.sleep`
+- `overlay_worker` → `Task` / `OperationQueue` 后台渲染
+- `drm_warpper` → `CALayer` 叠加 + `CADisplayLink`
+- `epconfig.json` → `Codable` 模型 + `@Published` 状态驱动 UI
+
+### 4) SwiftUI 重写实施步骤（落地顺序）
+
+1. **资源与 UI 盘点**：整理页面与交互流程，建立 SwiftUI 页面结构草图。
+2. **模型层落地**：定义 `Operator`/`Playlist` 等模型，与配置 JSON 对齐。
+3. **播放链路搭建**：先实现单资源视频播放与切换，再接入排期逻辑。
+4. **Overlay/Transition**：用 CoreAnimation/Metal 复现过渡效果。
+5. **UI 完成与联调**：对照原 UI 行为补齐细节，处理异常与边界场景。
+
 ## 需要注意的关键点
 
 - **性能与内存**：iOS 合成链路与嵌入式 DRM 完全不同，需关注纹理上传与帧率。
 - **视频格式适配**：确保素材编码格式（H.264/AAC 等）适配 iOS 硬解能力。
 - **多线程模型**：避免阻塞主线程；渲染与解码应使用 GCD/OperationQueue。
 - **授权与合规**：复用的开源库需核对许可证（LVGL/JSON/stb 等）。
-- **UI 生成链路**：若继续用 EEZ Studio，需验证生成代码是否适合 iOS 平台。
+- **UI 生成链路**：采用 SwiftUI 全面重写，EEZ/LVGL 仅作为设计参考。
 
 ## 风险提示
 
