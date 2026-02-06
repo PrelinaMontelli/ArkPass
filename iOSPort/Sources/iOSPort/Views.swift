@@ -1,3 +1,6 @@
+// iOS-only UI layer; prevents watchOS/macOS from compiling UIKit/AVFoundation usage.
+#if os(iOS)
+import AVFoundation
 import AVKit
 import SwiftUI
 import UniformTypeIdentifiers
@@ -392,3 +395,5 @@ struct ResourceImageView: View {
         }
     }
 }
+
+#endif
