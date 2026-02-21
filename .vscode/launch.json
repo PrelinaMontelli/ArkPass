@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:ArkPass}/iOSPort",
+            "name": "Debug ArkPassApp (iOSPort)",
+            "target": "ArkPassApp",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug ArkPassApp (iOSPort)"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:ArkPass}/iOSPort",
+            "name": "Release ArkPassApp (iOSPort)",
+            "target": "ArkPassApp",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release ArkPassApp (iOSPort)"
+        }
+    ]
+}

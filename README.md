@@ -92,6 +92,7 @@ make
 
 * [程序结构](docs/application_structure.md)
 * [overlay层开发指南](docs/overlay_dev_note.md)
+* [iOS 移植可行性与工作清单](docs/ios_porting.md)
 
 ## 直接嵌入的开源代码
 
